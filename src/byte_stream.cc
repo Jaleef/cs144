@@ -1,8 +1,13 @@
 #include "byte_stream.hh"
+#include <cstdint>
+#include <string_view>
+#include <iostream>
 
 using namespace std;
 
-ByteStream::ByteStream( uint64_t capacity ) : capacity_( capacity ) {}
+ByteStream::ByteStream( uint64_t capacity ) : capacity_( capacity ) {
+  buffer_.clear();
+}
 
 bool Writer::is_closed() const
 {
@@ -13,17 +18,17 @@ bool Writer::is_closed() const
 void Writer::push( string data )
 {
   // Your code here.
+  if (data.empty()) {
+    return ;
+  }
+  
   uint64_t len = data.size();
-  if (len <= available_capacity()) {
-    buffer_.append(data);
-    bytes_pushed_ += len;
-    
-    return;
+  if (len > available_capacity()) {
+    len = available_capacity();
   }
 
-  bytes_pushed_ += available_capacity();
-  buffer_.append(data.substr(0, available_capacity()));
-  
+  bytes_pushed_ += len;
+  buffer_.insert(buffer_.end(), data.begin(), data.begin() + len);
 }
 
 void Writer::close()
@@ -59,21 +64,21 @@ uint64_t Reader::bytes_popped() const
 string_view Reader::peek() const
 {
   // Your code here.
+  // peek_.assign(buffer_.begin(), buffer_.end());
+  // std::cout << peek_ << " " << buffer_.size() << std::endl;
   return std::string_view(buffer_);
 }
 
 void Reader::pop( uint64_t len )
 {
   // Your code here.
-  if (len <= bytes_buffered()) {
-    buffer_ = buffer_.substr(len);
-    bytes_popped_ += len;
-
-    return;
+  if (len > bytes_buffered()) {
+    len = bytes_buffered();
   }
 
-  bytes_popped_ += bytes_buffered();
-  buffer_ = "";
+  bytes_popped_ += len;
+  // buffer_ = buffer_.substr(len);
+  buffer_.erase(buffer_.begin(), buffer_.begin() + len);
 }
 
 uint64_t Reader::bytes_buffered() const

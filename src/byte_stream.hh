@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <string_view>
+#include <deque>
 
 class Reader;
 class Writer;
@@ -27,6 +28,8 @@ protected:
   bool error_ {};
   bool is_closed_ {};
   std::string buffer_ {};
+  // std::deque<char> buffer_ {};
+  // mutable std::string peek_ {};
   int bytes_pushed_ {};
 
 
