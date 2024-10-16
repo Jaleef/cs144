@@ -46,19 +46,19 @@ uint64_t Writer::bytes_pushed() const
 bool Reader::is_finished() const
 {
   // Your code here.
-  return {};
+  return is_finished_;
 }
 
 uint64_t Reader::bytes_popped() const
 {
   // Your code here.
-  return {};
+  return bytes_popped_;
 }
 
 string_view Reader::peek() const
 {
   // Your code here.
-  return {};
+  return std::string_view(buffer_);
 }
 
 void Reader::pop( uint64_t len )
@@ -70,5 +70,5 @@ void Reader::pop( uint64_t len )
 uint64_t Reader::bytes_buffered() const
 {
   // Your code here.
-  return {};
+  return buffer_.size();
 }
