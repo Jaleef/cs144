@@ -5,8 +5,8 @@ using namespace std;
 
 int main() {
   ByteStream bs(2);
-  Writer w = bs.writer();
-  Reader r = bs.reader();
+  Writer& w = bs.writer();
+  Reader& r = bs.reader();
 
   w.push("");
   w.push("cat");
