@@ -26,7 +26,7 @@ protected:
   uint64_t capacity_;
   bool error_ {};
   bool is_closed_ {};
-  std::string buffer_;
+  std::string buffer_ {};
   int bytes_pushed_ {};
 };
 
