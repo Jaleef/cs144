@@ -58,7 +58,6 @@ void Reassembler::writePendingToStream() {
     if (it->first > next_index_) {
       break;
     }
-    std::cout << "next_index_: " << next_index_ << std::endl;
 
     if (it->first + it->second.size() <= next_index_) {
       bytes_pending_ -= it->second.size();
