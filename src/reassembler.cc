@@ -74,6 +74,9 @@ void Reassembler::writePendingToStream()
 
 void Reassembler::handleRepeatInPending( uint64_t first_index, std::string data )
 {
+  if ( data.empty() ) {
+    return;
+  }
 
   for ( auto it = pending_.begin(); it != pending_.end(); ++it ) {
 
@@ -98,12 +101,7 @@ void Reassembler::handleRepeatInPending( uint64_t first_index, std::string data 
 
     // it刚好在data的范围之内
     if ( first_index <= it_start && data_end >= it_end ) {
-      bytes_pending_ -= it->second.size();
-      pending_.erase( it );
-
-      pending_[first_index] = data.substr( 0, it_end - first_index );
-      bytes_pending_ += it_end - first_index;
-
+      handleRepeatInPending( first_index, data.substr( 0, it_start - first_index ) );
       handleRepeatInPending( it_end, data.substr( it_end - first_index ) );
 
       return;
@@ -111,24 +109,22 @@ void Reassembler::handleRepeatInPending( uint64_t first_index, std::string data 
 
     // data的起始位置在it的起始之前, 且data的结束位置在it的结束之后
     if ( first_index < it_start && data_end <= it_end ) {
-      pending_[first_index] = data.substr( 0, it_start - first_index );
-      bytes_pending_ += it_start - first_index;
+      handleRepeatInPending( first_index, data.substr( 0, it_start - first_index ) );
 
       return;
     }
 
     // data的起始位置在it的起始之后, 且data的结束位置在it的结束之后
     if ( first_index >= it_start && data_end > it_end ) {
-      // pending_[it_end] = data.substr(it_end - first_index);
-      // bytes_pending_ += data_end - it_end;
-
       handleRepeatInPending( it_end, data.substr( it_end - first_index ) );
 
       return;
     }
   }
+
   // 如果上面一直没有return, 说明data和it没有重叠部分
   int insertCap = std::min( data.size(), capacity_ - first_index );
   pending_[first_index] = data.substr( 0, insertCap );
   bytes_pending_ += insertCap;
+  
 }
