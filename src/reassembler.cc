@@ -15,33 +15,34 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
     if ( overlap >= (int64_t)data.size() ) {
       goto end;
     }
+
     int64_t cap = output_.writer().available_capacity();
 
     if ( cap > (int64_t)data.size() - overlap ) {
       cap = data.size() - overlap;
     }
+
     output_.writer().push( data.substr( overlap, cap ) );
     next_index_ += cap;
 
     writePendingToStream();
-  } else if ( capacity_ - bytes_pending_ >= data.size() ) {
-    if ( is_last_substring ) {
-      pending_[first_index] = data.substr( 0, capacity_ - first_index );
-      bytes_pending_ += capacity_ - first_index;
-    } else {
 
-      handleRepeatInPending( first_index, data );
-    }
+  } else if ( capacity_ - bytes_pending_ >= data.size() ) {
+    // 如果pending的字节数小于capacity, 可以将data写入pending
+    handleRepeatInPending( first_index, data );
+
   }
 
 end:
   if ( is_last_substring ) {
     last_appeared_ = true;
     end_index_ = first_index + data.size();
+
   }
 
   if ( last_appeared_ && next_index_ == end_index_ ) {
     output_.writer().close();
+
   }
 }
 
@@ -51,6 +52,9 @@ uint64_t Reassembler::bytes_pending() const
   return bytes_pending_;
 }
 
+/*
+  将pending中的数据写入output
+*/
 void Reassembler::writePendingToStream()
 {
   for ( auto it = pending_.begin(); it != pending_.end(); ++it ) {
@@ -72,6 +76,10 @@ void Reassembler::writePendingToStream()
   }
 }
 
+/*
+  这个函数处理data和pending_中的数据重叠部分
+  最终使得pending中每一个data段都不重叠
+*/
 void Reassembler::handleRepeatInPending( uint64_t first_index, std::string data )
 {
   if ( data.empty() ) {
@@ -126,5 +134,5 @@ void Reassembler::handleRepeatInPending( uint64_t first_index, std::string data 
   int insertCap = std::min( data.size(), capacity_ - first_index );
   pending_[first_index] = data.substr( 0, insertCap );
   bytes_pending_ += insertCap;
-  
+
 }
